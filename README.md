@@ -1,4 +1,4 @@
-# Welcome This Collection of Components.
+# Welcome to This Collection of Components.
 
  Currently authored by Harley Ewert.
 
