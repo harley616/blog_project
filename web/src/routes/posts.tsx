@@ -1,48 +1,45 @@
-import { CSSProperties, Dispatch, FC, SetStateAction, useEffect, useState } from 'react'
+import { FC, useCallback, useEffect, useMemo, useState } from 'react'
 import { useAppSelector, useAppDispatch } from '../hooks/redux'
-import { loadPosts, PostType } from '../store/slice/posts'
+import { loadPosts, PostType, turnPage } from '../store/slice/posts'
 import Box from '../components/Box'
 import Text from '../components/Text'
 import MakePost from '../components/MakePost'
+import { Button } from '../components/Button'
 
-const Post: FC<{
-	post: PostType
-	index: number
-	active: number
-	setActive: Dispatch<SetStateAction<number>>
-}> = ({ post, index, active, setActive }) => {
-	const postsLength = useAppSelector((state) => state.posts.posts).length
-	const [zIndex, setZIndex] = useState(index)
-	const PostClass: CSSProperties = {
-		position: 'absolute',
-		zIndex: zIndex,
-		top: 0,
-		bottom: 0,
-		margin: 'auto',
-		width: '30rem',
+const ActivePost: FC<{ post: PostType }> = ({ post }) => {
+	const [inEdit, setInEdit] = useState(false)
+
+	const handleEdit = useCallback(() => {
+		setInEdit(true)
+	}, [])
+
+	const handleSave = () => {
+		console.log('save')
 	}
 
-	const handleFocus = () => {
-		setActive(index)
-		setZIndex(postsLength)
+	const handleCancel = () => {
+		setInEdit(false)
 	}
-
-	useEffect(() => {
-		if (index !== active) {
-			setZIndex(active < index ? postsLength - index : index)
-		}
-	}, [active, index, postsLength])
 	return (
-		<div className="relative h-3/4 w-16">
-			<div style={PostClass} onMouseEnter={() => handleFocus()}>
-				<Box className="h-full">
-					<div className="flex">
-						<Text className="grow">{post.title}</Text>
-						<Text>{new Date(post.date).toDateString()}</Text>
-					</div>
-					<Text>{post.body}</Text>
-				</Box>
-			</div>
+		<div className="h-3/4 w-[25rem]">
+			<Box className="h-full w-full">
+				<div className="flex">
+					<Text className="grow">{post.title}</Text>
+					<Text>{new Date(post.date).toDateString()}</Text>
+				</div>
+				<Text>{post.body}</Text>
+				<div className="relative">
+					{inEdit ? (
+						<div className="flex justify-around">
+							<Button text="X" onClick={handleCancel} color="scary" />
+							<Button text="Save" onClick={handleSave} color="happy" />
+							<Button text="Delete" onClick={handleEdit} color="scary" />
+						</div>
+					) : (
+						<Button text="Edit" onClick={handleEdit} color="scary" hintText="this is an edit button" />
+					)}
+				</div>
+			</Box>
 		</div>
 	)
 }
@@ -50,21 +47,37 @@ const Post: FC<{
 const Posts: FC = () => {
 	const dispatch = useAppDispatch()
 	const posts = useAppSelector((state) => state.posts.posts)
-	const [active, setActive] = useState<number>(posts.length - 1)
+	const [active, setActive] = useState<number>(0)
 	const auth = useAppSelector((state) => state.auth.loggedIn)
 
+	const paddedPosts = useMemo(() => {
+		if (posts.length % 2 !== 0) {
+			return [...posts, { _id: '0', title: '', body: '', date: 0, isOpen: false }]
+		}
+		return posts
+	}, [posts])
+
+	useEffect(() => {
+		dispatch(turnPage(active))
+	}, [active, dispatch])
+	console.log(active)
 	useEffect(() => {
 		dispatch(loadPosts())
 	}, [dispatch])
 	return (
 		<div className="flex grow">
-			<Box className="w-2/3 flex flex-col">
+			<Box className={`w-${auth ? '2/3' : 'full'} flex flex-col`}>
 				<Text>This is my collection of blog posts</Text>
-				<div className="flex grow overflow-scroll">
-					{posts.map((post, i) => (
-						<Post post={post} key={post._id} index={i} active={active} setActive={setActive} />
-					))}
+				<div className="flex grow gap-2 overflow-scroll">
+					{paddedPosts.map((post, i) => {
+						if (post.isOpen) {
+							return <ActivePost post={post} key={post._id} />
+						} else {
+							return <div key={post._id} className={`h-3/4 w-1 border-${i < active ? 'l' : 'r'}-2`} />
+						}
+					})}
 				</div>
+				<Button text="Turn Page" onClick={() => setActive((prev) => (prev + 2) % paddedPosts.length)} />
 			</Box>
 			{auth && <MakePost />}
 		</div>
