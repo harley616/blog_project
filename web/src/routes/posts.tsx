@@ -85,7 +85,7 @@ const Posts: FC = () => {
 						}
 					})}
 				</div>
-				<div className="flex">
+				<div className="flex justify-around">
 					<Button text="Turn Page Back" onClick={turnPageBack} />
 					<Button text="Turn Page" onClick={turnPageForward} />
 				</div>
