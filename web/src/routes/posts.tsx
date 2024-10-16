@@ -43,9 +43,18 @@ const Posts: FC = () => {
 	useEffect(() => {
 		dispatch(turnPage(active))
 	}, [active, dispatch])
+
 	useEffect(() => {
 		dispatch(loadPosts())
 	}, [dispatch])
+
+	const turnPageForward = useCallback(() => {
+		setActive((prev) => (prev + 2) % paddedPosts.length)
+	}, [paddedPosts.length])
+
+	const turnPageBack = useCallback(() => {
+		setActive((prev) => (prev + paddedPosts.length - 2) % paddedPosts.length)
+	}, [paddedPosts.length])
 
 	console.log(paddedPosts.length)
 
@@ -76,7 +85,10 @@ const Posts: FC = () => {
 						}
 					})}
 				</div>
-				<Button text="Turn Page" onClick={() => setActive((prev) => (prev + 2) % paddedPosts.length)} />
+				<div className="flex">
+					<Button text="Turn Page Back" onClick={turnPageBack} />
+					<Button text="Turn Page" onClick={turnPageForward} />
+				</div>
 			</div>
 		</div>
 	)
