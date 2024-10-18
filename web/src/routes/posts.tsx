@@ -1,26 +1,31 @@
 import { FC, useCallback, useEffect, useMemo, useState } from 'react'
 import { useAppSelector, useAppDispatch } from '../hooks/redux'
-import { loadPosts, PostType, turnPage } from '../store/slice/posts'
+import { loadPosts, PostType, setMakePostModal, turnPage } from '../store/slice/posts'
 import Box from '../components/Box'
 import Text from '../components/Text'
 import MakePost from '../components/MakePost'
 import { Button } from '../components/Button'
-
+import Modal from '../components/Modal'
 const ActivePost: FC<{ post: PostType }> = ({ post }) => {
 	return (
 		<div className="w-[30rem] h-[45rem] bg-page p-4 flex flex-col">
-			<div className="flex">
-				<Text className="grow">{post.title}</Text>
-				<Text>{new Date(post.date).toDateString()}</Text>
+			<div className="flex justify-center">
+				<Text>{post.title}</Text>
 			</div>
-			<Text>{post.body}</Text>
+			<Text className="grow">{post.body}</Text>
+			<Text className="ml-auto">{new Date(post.date).toDateString()}</Text>
 		</div>
 	)
 }
 
+const splitStringIntoLines = (str: string) => {
+	const lines = str.split(/\r?\n|\r|\n/g)
+	return lines
+}
+
 const Posts: FC = () => {
 	const dispatch = useAppDispatch()
-	const posts = useAppSelector((state) => state.posts.posts)
+	const { posts, makePostModal } = useAppSelector((state) => state.posts)
 	const [active, setActive] = useState<number>(0)
 	const auth = useAppSelector((state) => state.auth.loggedIn)
 
@@ -56,7 +61,9 @@ const Posts: FC = () => {
 		setActive((prev) => (prev + paddedPosts.length - 2) % paddedPosts.length)
 	}, [paddedPosts.length])
 
-	console.log(paddedPosts.length)
+	const handleOpenMakePostModal = useCallback(() => {
+		dispatch(setMakePostModal(true))
+	}, [dispatch])
 
 	return (
 		<div className="flex grow">
@@ -85,7 +92,12 @@ const Posts: FC = () => {
 						}
 					})}
 				</div>
+				<Modal show={makePostModal}>
+					<MakePost />
+				</Modal>
+
 				<div className="flex justify-around">
+					<Button text="Make Post" onClick={handleOpenMakePostModal} />
 					<Button text="Turn Page Back" onClick={turnPageBack} />
 					<Button text="Turn Page" onClick={turnPageForward} />
 				</div>

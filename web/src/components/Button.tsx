@@ -3,7 +3,7 @@ import { createRef, FC, ReactNode, RefObject, useCallback, useEffect, useMemo, u
 
 type ButtonColors = 'normal' | 'scary' | 'happy'
 
-export const Button: FC<{ text: string | ReactNode; customClass?: string; onClick: () => void; color?: ButtonColors; hintText?: string }> = ({ text, customClass = '', onClick, color, hintText = '' }) => {
+export const Button: FC<{ text: string | ReactNode; className?: string; onClick: () => void; color?: ButtonColors; hintText?: string }> = ({ text, className = '', onClick, color, hintText = '' }) => {
 	const [showHintText, setShowHintText] = useState(false)
 	const [mouseOn, setMouseOn] = useState(false)
 	const handleMouseEnter = () => {
@@ -35,7 +35,7 @@ export const Button: FC<{ text: string | ReactNode; customClass?: string; onClic
 	return (
 		<>
 			{showHintText && <div className="absolute bottom-0 mb-10 text-gray-100 bg-slate-500 border p-1 rounded">{hintText}</div>}
-			<button className={`${buttonColorClass} py-1 px-4 rounded border shadow-md ` + customClass} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onClick={() => onClick()}>
+			<button className={`${buttonColorClass} py-1 px-4 rounded border shadow-md ` + className} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onClick={() => onClick()}>
 				{text}
 			</button>
 		</>

@@ -45,11 +45,13 @@ export const dummyData: PostType[] = [
 interface PostsState {
 	posts: PostType[]
 	activeIndex: number
+	makePostModal: boolean
 }
 
 const initialState: PostsState = {
 	posts: [],
 	activeIndex: 0,
+	makePostModal: false,
 }
 
 export const postsSlice = createSlice({
@@ -62,10 +64,13 @@ export const postsSlice = createSlice({
 		setActiveIndex: (state, action) => {
 			state.activeIndex = action.payload
 		},
+		setMakePostModal: (state, action) => {
+			state.makePostModal = action.payload
+		},
 	},
 })
 
-export const { setPosts, setActiveIndex } = postsSlice.actions
+export const { setPosts, setActiveIndex, setMakePostModal } = postsSlice.actions
 
 const setPostsOpen = (posts: PostType[], index: number) => {
 	const newPosts = posts.map((post, i) => {
