@@ -1,19 +1,35 @@
-import express from "express";
-import jwt from "jsonwebtoken";
-import { Secret } from "jsonwebtoken";
+import express from 'express'
+import jwt from 'jsonwebtoken'
+import bcrypt from 'bcryptjs'
+import { Secret } from 'jsonwebtoken'
 
-const router = express.Router();
+const router = express.Router()
 
-router.post("/", (req, res) => {
-  const { username, password } = req.body;
-  if (username === process.env.USERNAME && password === process.env.PASSWORD) {
-    const token = jwt.sign({ username }, process.env.JWT_SECRET as Secret, {
-      expiresIn: "1h",
-    });
-    res.json({ token });
-  } else {
-    res.sendStatus(400);
-  }
-});
+router.post('/', async (req, res) => {
+	const { username, password } = req.body
 
-export { router };
+	// Fetch the hashed password from environment variables or database
+	const storedUsername = process.env.USER_NAME
+	const storedPassword = process.env.PASSWORD
+
+	if (username === storedUsername) {
+		const isPasswordValid = await bcrypt.compare(
+			storedPassword as string,
+			password,
+		)
+		if (isPasswordValid) {
+			const token = jwt.sign(
+				{ username },
+				process.env.JWT_SECRET as Secret,
+				{
+					expiresIn: '1h',
+				},
+			)
+			return res.json({ token })
+		}
+	}
+
+	res.sendStatus(400)
+})
+
+export { router }
